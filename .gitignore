@@ -22,3 +22,4 @@ Staging/
 *.sublime-workspace
 
 External/www/wiki/*
+.vs
