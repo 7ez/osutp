@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace osu_tp.TomPoints
+namespace osutp.TomPoints
 {
     [Flags]
     public enum Mods

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <RootNamespace>osu_tp</RootNamespace>
+    <RootNamespace>osutp</RootNamespace>
 	<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AssemblyTitle>osu!tp</AssemblyTitle>
     <Description>osu!tp's beatmap difficulty algorithm</Description>

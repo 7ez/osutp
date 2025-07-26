@@ -1,4 +1,4 @@
-﻿namespace osu_tp.TomPoints
+﻿namespace osutp.TomPoints
 {
     public class TpDifficultyCalculation
     {

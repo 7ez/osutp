@@ -2,7 +2,7 @@
 using System.Numerics;
 using osu.GameplayElements.HitObjects;
 
-namespace osu_tp.TomPoints
+namespace osutp.TomPoints
 {
     class TpHitObject
     {

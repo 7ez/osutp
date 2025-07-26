@@ -4,7 +4,7 @@ using System.Linq;
 using osu.GameplayElements.Beatmaps;
 using osu.GameplayElements.HitObjects;
 
-namespace osu_tp.TomPoints
+namespace osutp.TomPoints
 {
     /// <summary>
     /// osu!tp's difficulty calculator ported to the osu! sdk as far as so far possible.
