@@ -13,10 +13,10 @@ namespace osutp.TomPoints
             Score = score;
         }
 
-        public double ComputeTotalValue()
+        public TpPerformanceResult ComputeTotalValue()
         {
             if (Score.IsRelaxing() || Score.IsAutoplay())
-                return 0.0;
+                return new TpPerformanceResult();
             
             // Custom multipliers for NoFail and SpunOut
             double multiplier = 1.1f;
@@ -27,12 +27,23 @@ namespace osutp.TomPoints
             if (Score.Mods.HasFlag(Mods.SpunOut))
                 multiplier *= 0.95f;
 
+            double aim = ComputeAimValue();
+            double speed = ComputeSpeedValue();
+            double acc = ComputeAccValue();
             double attributes = 
-                Math.Pow(ComputeAimValue(), 1.1f) +
-                Math.Pow(ComputeSpeedValue(), 1.1f) +
-                Math.Pow(ComputeAccValue(), 1.1f);
+                Math.Pow(aim, 1.1f) +
+                Math.Pow(speed, 1.1f) +
+                Math.Pow(acc, 1.1f);
 
-            return Math.Pow(attributes, 1.0f / 1.1f) * multiplier;
+            double total = Math.Pow(attributes, 1.0f / 1.1f) * multiplier;
+
+            return new TpPerformanceResult
+            {
+                Total = total,
+                Aim = aim,
+                Speed = speed,
+                Acc = acc
+            };
         }
 
         public double ComputeAimValue()
