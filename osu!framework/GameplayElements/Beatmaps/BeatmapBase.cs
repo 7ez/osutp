@@ -2,7 +2,7 @@ using System;
 
 namespace osu.GameplayElements.Beatmaps
 {
-    public abstract class BeatmapBase : MarshalByRefObject
+    public class BeatmapBase : MarshalByRefObject
     {
         #region Difficulty Settings
         public float DifficultyApproachRate = 5;

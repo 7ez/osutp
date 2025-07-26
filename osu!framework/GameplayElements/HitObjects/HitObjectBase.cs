@@ -16,7 +16,7 @@ namespace osu.GameplayElements.HitObjects
         }
     }
 
-    public abstract class HitObjectBase : MarshalByRefObject
+    public class HitObjectBase : MarshalByRefObject
     {
         /// <summary>
         /// The time at which the object is to be hit.
@@ -141,7 +141,7 @@ namespace osu.GameplayElements.HitObjects
         /// For spannable objects, the position at which this object ends.
         /// Note that in the case of repeat sliders, this will be the final position of the ball.
         /// </summary>
-        public abstract Vector2 EndPosition { get; set; }
+        public Vector2 EndPosition { get; set; }
 
         /// <summary>
         /// Current height in a stack of notes. Zero means no stack.
@@ -151,7 +151,7 @@ namespace osu.GameplayElements.HitObjects
         /// <summary>
         /// The number displayed on this hitobject (one-based).
         /// </summary>
-        public abstract int ComboNumber { get; set; }
+        public int ComboNumber { get; set; }
 
         /// <summary>
         /// Is this object the last in a combo?
