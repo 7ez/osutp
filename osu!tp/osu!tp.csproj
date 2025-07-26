@@ -1,18 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <RootNamespace>osu_tp</RootNamespace>
+	<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AssemblyTitle>osu!tp</AssemblyTitle>
+    <Description>osu!tp's beatmap difficulty algorithm</Description>
+    <Product>osu!tp</Product>
+    <Copyright>Copyright © Thomas Müller 2013</Copyright>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
   </PropertyGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\osu!framework\osu!framework.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Microsoft.Xna.Framework">
-      <HintPath>..\osu!framework\Microsoft.Xna.Framework.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
 </Project>

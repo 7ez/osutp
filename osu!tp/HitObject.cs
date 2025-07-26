@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.Xna.Framework;
+using System.Numerics;
 using osu.GameplayElements.HitObjects;
 
 namespace osu_tp.TomPoints
@@ -55,7 +53,7 @@ namespace osu_tp.TomPoints
                     if (Distance > SliderFollowCircleRadius)
                     {
                         // Yep, we need to move the cursor
-                        Difference.Normalize(); // Obtain the direction of difference. We do no longer need the actual difference
+                        Difference = Vector2.Normalize(Difference); // Obtain the direction of difference. We do no longer need the actual difference
                         Distance -= SliderFollowCircleRadius;
                         CursorPos += Difference * Distance; // We move the cursor just as far as needed to stay in the follow circle
                         LazySliderLengthFirst += Distance;
@@ -86,7 +84,7 @@ namespace osu_tp.TomPoints
                         if (Distance > SliderFollowCircleRadius)
                         {
                             // Yep, we need to move the cursor
-                            Difference.Normalize(); // Obtain the direction of difference. We do no longer need the actual difference
+                            Difference = Vector2.Normalize(Difference); // Obtain the direction of difference. We do no longer need the actual difference
                             Distance -= SliderFollowCircleRadius;
                             CursorPos += Difference * Distance; // We move the cursor just as far as needed to stay in the follow circle
                             LazySliderLengthSubsequent += Distance;

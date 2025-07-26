@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+using System.Numerics;
 
 namespace osu.GameplayElements.HitObjects
 {
@@ -133,11 +131,6 @@ namespace osu.GameplayElements.HitObjects
         /// Needed where an RGB triple is insufficient.
         /// </summary>
         public int ComboColourIndex;
-
-        /// <summary>
-        /// The raw colour value of this object (combo colour).
-        /// </summary>
-        public Color Colour;
 
         /// <summary>
         /// Gamefield position of this object.

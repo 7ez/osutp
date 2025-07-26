@@ -1,11 +1,11 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.13.35825.156
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "osu!framework", "osu!framework\osu!framework.csproj", "{61AA9909-A6FB-4DC3-91BA-AC4B9556C8A5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "osu!framework", "osu!framework\osu!framework.csproj", "{61AA9909-A6FB-4DC3-91BA-AC4B9556C8A5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "osu!tp", "osu!tp\osu!tp.csproj", "{330376B4-571E-4A69-86F1-86EC6179CD58}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "osu!tp", "osu!tp\osu!tp.csproj", "{330376B4-571E-4A69-86F1-86EC6179CD58}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
