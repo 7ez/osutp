@@ -2,7 +2,7 @@
 
 namespace osutp.TomPoints
 {
-    public abstract class TpScore
+    public class TpScore
     {
         public string BeatmapFilename;
         public string BeatmapChecksum;
