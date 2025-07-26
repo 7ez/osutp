@@ -87,8 +87,7 @@ namespace osutp.TomPoints
                 SliderMultiplier = beatmap.DifficultySliderMultiplier,
             };
         }
-
-
+        
         // Exceptions would be nicer to handle errors, but for this small project it shall be ignored.
         private bool CalculateStrainValues(List<TpHitObject> tpHitObjects)
         {
@@ -166,7 +165,9 @@ namespace osutp.TomPoints
             // Build the weighted sum over the highest strains for each interval
             double Difficulty = 0;
             double Weight = 1;
-            HighestStrains.Sort((a, b) => b.CompareTo(a)); // Sort from highest to lowest strain.
+            
+            // Sort from highest to lowest strain.
+            HighestStrains.Sort((a, b) => b.CompareTo(a));
 
             foreach (double Strain in HighestStrains)
             {

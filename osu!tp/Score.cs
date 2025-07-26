@@ -2,7 +2,7 @@
 
 namespace osutp.TomPoints
 {
-    public class TpScore
+    public abstract class TpScore
     {
         public string BeatmapFilename;
         public string BeatmapChecksum;
@@ -15,21 +15,6 @@ namespace osutp.TomPoints
         public int AmountGeki;
         public int AmountKatu;
         public Mods Mods;
-
-        public TpScore(string beatmapFilename, string beatmapChecksum, int totalScore, int maxCombo, int amount300, int amount100, int amount50, int amountMiss, int amountGeki, int amountKatu, Mods mods)
-        {
-            BeatmapFilename = beatmapFilename;
-            BeatmapChecksum = beatmapChecksum;
-            TotalScore = totalScore;
-            MaxCombo = maxCombo;
-            Amount300 = amount300;
-            Amount100 = amount100;
-            Amount50 = amount50;
-            AmountMiss = amountMiss;
-            AmountGeki = amountGeki;
-            AmountKatu = amountKatu;
-            Mods = mods;
-        }
 
         public bool IsRelaxing()
         {

@@ -31,7 +31,6 @@ namespace osutp.TomPoints
             float ScalingFactor = (52.0f / CircleRadius);
             NormalizedStartPosition = BaseHitObject.Position * ScalingFactor;
 
-
             // Calculate approximation of lazy movement on the slider
             if ((BaseHitObject.Type & HitObjectType.Slider) > 0)
             {
@@ -130,7 +129,6 @@ namespace osutp.TomPoints
             CalculateSpecificStrain(PreviousHitObject, TpDifficulty.DifficultyType.Aim);
         }
 
-
         // Caution: The subjective values are strong with this one
         private static double SpacingWeight(double distance, TpDifficulty.DifficultyType Type)
         {
@@ -138,7 +136,6 @@ namespace osutp.TomPoints
             switch (Type)
             {
                 case TpDifficulty.DifficultyType.Speed:
-
                     {
                         double Weight;
 
@@ -165,22 +162,16 @@ namespace osutp.TomPoints
 
                         return Weight;
                     }
-
-
+                
                 case TpDifficulty.DifficultyType.Aim:
-
                     return Math.Pow(distance, 0.99);
-
-
-                // Should never happen. 
+                
                 default:
+                    // Should never happen. 
                     return 0;
             }
         }
-
-
-
-
+        
         private void CalculateSpecificStrain(TpHitObject PreviousHitObject, TpDifficulty.DifficultyType Type)
         {
             double Addition = 0;
@@ -233,9 +224,7 @@ namespace osutp.TomPoints
 
             Strains[(int)Type] = PreviousHitObject.Strains[(int)Type] * Decay + Addition;
         }
-
-
-
+        
         public double DistanceTo(TpHitObject other)
         {
             // Scale the distance by circle size.
