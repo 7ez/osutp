@@ -48,7 +48,7 @@ namespace osutp.TomPoints
 
         public double ComputeAimValue()
         {
-            double aimValue = Math.Pow(5.0f * Math.Max(1.0f, Difficulty.AimDifficulty / 0.0445f) - 4.0f, 3.0f) / 100000.0f;
+            double aimValue = Math.Pow(5.0f * Math.Max(1.0f, Difficulty.AimStars / 0.0445f) - 4.0f, 3.0f) / 100000.0f;
 
             // Longer maps are worth more
             aimValue *= 1 + 0.1f * Math.Min(1.0f, Score.TotalHits() / 1500.0f);
@@ -107,7 +107,7 @@ namespace osutp.TomPoints
 
         public double ComputeSpeedValue()
         {
-            double speedValue = Math.Pow(5.0f * Math.Max(1.0f, Difficulty.SpeedDifficulty / 0.045f) - 4.0f, 3.0f) / 100000.0f;
+            double speedValue = Math.Pow(5.0f * Math.Max(1.0f, Difficulty.SpeedStars / 0.045f) - 4.0f, 3.0f) / 100000.0f;
 
             // Longer maps are worth more
             speedValue *= 1 + 0.1f * Math.Min(1.0f, Score.TotalHits() / 1500.0f);
