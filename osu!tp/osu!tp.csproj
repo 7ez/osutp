@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <RootNamespace>osu_tp</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\osu!framework\osu!framework.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Microsoft.Xna.Framework">
+      <HintPath>..\osu!framework\Microsoft.Xna.Framework.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
