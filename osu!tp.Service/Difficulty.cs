@@ -11,6 +11,7 @@ namespace osutp.Service
     {
         public BeatmapBase? Beatmap { get; set; }
         public List<HitObjectBase>? HitObjects { get; set; }
+        public Mods Mods = 0;
     }
 
     public class Difficulty
