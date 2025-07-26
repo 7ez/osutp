@@ -13,10 +13,10 @@
         public double AimStars;
         public double StarRating;
 
-        public byte ApproachRate = 5;
-        public byte CircleSize = 5;
-        public byte HpDrainRate = 5;
-        public byte OverallDifficulty = 5;
+        public float ApproachRate = 5;
+        public float CircleSize = 5;
+        public float HpDrainRate = 5;
+        public float OverallDifficulty = 5;
 
         public double SliderMultiplier = 1.4;
         public double SliderTickRate = 1;
