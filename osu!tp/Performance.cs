@@ -42,7 +42,7 @@ namespace osutp.TomPoints
                 Total = total,
                 Aim = aim,
                 Speed = speed,
-                Acc = acc
+                Acc = acc,
             };
         }
 
@@ -139,7 +139,9 @@ namespace osutp.TomPoints
 
             if (Difficulty.AmountNormal > 0)
             {
-                betterAccuracyPercentage = (Score.Amount300 - (Score.TotalHits() - Difficulty.AmountNormal)) * 6 + Score.Amount100 * 2 + Score.Amount50 / (Difficulty.AmountNormal * 6);
+                betterAccuracyPercentage =
+                    (float)((Score.Amount300 - (Score.TotalHits() - Difficulty.AmountNormal)) * 6 + Score.Amount100 * 2 + Score.Amount50)
+                    / (Difficulty.AmountNormal * 6);
             }
 
             // It is possible to reach a negative accuracy with this formula. Cap it at zero - zero points
@@ -172,7 +174,7 @@ namespace osutp.TomPoints
                 accValue *= 1.02f;
             }
 
-            return 0.0;
+            return accValue;
         }
     }
 }
