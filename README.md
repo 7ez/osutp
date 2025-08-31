@@ -5,5 +5,5 @@
 ## Features
 
 - [x] osu!tp calculation API independent from AiMod
-- [ ] Difficulty/Performance calculation service
-- [ ] Accounting for mods in difficulty calculation
+- [x] Difficulty/Performance calculation service
+- [x] Accounting for mods in difficulty calculation
