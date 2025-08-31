@@ -123,10 +123,10 @@ namespace osutp.TomPoints
         private float LazySliderLengthFirst = 0;
         private float LazySliderLengthSubsequent = 0;
 
-        public void CalculateStrains(TpHitObject PreviousHitObject)
+        public void CalculateStrains(TpHitObject PreviousHitObject, double timeRate)
         {
-            CalculateSpecificStrain(PreviousHitObject, TpDifficulty.DifficultyType.Speed);
-            CalculateSpecificStrain(PreviousHitObject, TpDifficulty.DifficultyType.Aim);
+            CalculateSpecificStrain(PreviousHitObject, TpDifficulty.DifficultyType.Speed, timeRate);
+            CalculateSpecificStrain(PreviousHitObject, TpDifficulty.DifficultyType.Aim, timeRate);
         }
 
         // Caution: The subjective values are strong with this one
@@ -172,11 +172,11 @@ namespace osutp.TomPoints
             }
         }
         
-        private void CalculateSpecificStrain(TpHitObject PreviousHitObject, TpDifficulty.DifficultyType Type)
+        private void CalculateSpecificStrain(TpHitObject PreviousHitObject, TpDifficulty.DifficultyType Type, double timeRate)
         {
-            double Addition = 0;
-            double TimeElapsed = BaseHitObject.StartTime - PreviousHitObject.BaseHitObject.StartTime;
+            double TimeElapsed = (BaseHitObject.StartTime - PreviousHitObject.BaseHitObject.StartTime) / timeRate;
             double Decay = Math.Pow(DECAY_BASE[(int)Type], TimeElapsed / 1000);
+            double Addition = 1;
 
             if ((BaseHitObject.Type & HitObjectType.Spinner) > 0)
             {
@@ -229,12 +229,6 @@ namespace osutp.TomPoints
         {
             // Scale the distance by circle size.
             return (NormalizedStartPosition - other.NormalizedEndPosition).Length();
-        }
-
-        public void ApplyStartTimeMultiplier(double multiplier)
-        {
-            // Apply a multiplier to the start time
-            BaseHitObject.StartTime = (int)(BaseHitObject.StartTime * multiplier);
         }
     }
 }

@@ -21,6 +21,7 @@ namespace osutp.TomPoints
         private const double STAR_SCALING_FACTOR = 0.045;
         private const double EXTREME_SCALING_FACTOR = 0.5;
         private const float PLAYFIELD_WIDTH = 512;
+        private float TimeRate = 1.0f;
 
         public TpDifficultyCalculation Process(BeatmapBase beatmap, List<HitObjectBase> hitObjects, Mods mods)
         {
@@ -40,18 +41,17 @@ namespace osutp.TomPoints
                 beatmap.DifficultyOverall = Math.Max(beatmap.DifficultyOverall / 2, 0);
             }
             
-            // Adjust the start-time multiplier for each hit object
-            // For DT/NC -> Speed * 150%
-            // For HT -> Speed * 75%
-            float StartTimeMultiplier = 1.0f;
-
             if (mods.HasFlag(Mods.DoubleTime) || mods.HasFlag(Mods.Nightcore))
             {
-                StartTimeMultiplier = 0.5f;
+                beatmap.DifficultyApproachRate *= 1.186f;
+                beatmap.DifficultyOverall *= 1.125f;
+                TimeRate = 1.5f;
             }
             if (mods.HasFlag(Mods.HalfTime))
             {
-                StartTimeMultiplier = 1.25f;
+                beatmap.DifficultyApproachRate *= 0.814f;
+                beatmap.DifficultyOverall *= 0.875f;
+                TimeRate = 0.75f;
             }
             
             // Fill our custom tpHitObject class, that carries additional information
@@ -61,14 +61,13 @@ namespace osutp.TomPoints
             foreach (HitObjectBase hitObject in hitObjects)
             {
                 var instance = new TpHitObject(hitObject, CircleRadius);
-                instance.ApplyStartTimeMultiplier(StartTimeMultiplier);
                 tpHitObjects.Add(instance);
             }
 
             // Sort tpHitObjects by StartTime of the HitObjects - just to make sure. Not using CompareTo, since it results in a crash (HitObjectBase inherits MarshalByRefObject)
             tpHitObjects.Sort((a, b) => a.BaseHitObject.StartTime - b.BaseHitObject.StartTime);
 
-            if (!CalculateStrainValues(tpHitObjects))
+            if (!CalculateStrainValues(tpHitObjects, TimeRate))
                 return null;
 
             double SpeedDifficulty = CalculateDifficulty(tpHitObjects, DifficultyType.Speed);
@@ -121,7 +120,7 @@ namespace osutp.TomPoints
         }
         
         // Exceptions would be nicer to handle errors, but for this small project it shall be ignored.
-        private bool CalculateStrainValues(List<TpHitObject> tpHitObjects)
+        private bool CalculateStrainValues(List<TpHitObject> tpHitObjects, double timeRate)
         {
             // Traverse hitObjects in pairs to calculate the strain value of NextHitObject from the strain value of CurrentHitObject and environment.
             List<TpHitObject>.Enumerator HitObjectsEnumerator = tpHitObjects.GetEnumerator();
@@ -139,7 +138,7 @@ namespace osutp.TomPoints
             while (HitObjectsEnumerator.MoveNext())
             {
                 NextHitObject = HitObjectsEnumerator.Current;
-                NextHitObject.CalculateStrains(CurrentHitObject);
+                NextHitObject.CalculateStrains(CurrentHitObject, timeRate);
                 CurrentHitObject = NextHitObject;
             }
 
@@ -156,9 +155,11 @@ namespace osutp.TomPoints
 
         private double CalculateDifficulty(List<TpHitObject> tpHitObjects, DifficultyType Type)
         {
+            double ActualStrainStep = STRAIN_STEP * TimeRate;
+            
             // Find the highest strain value within each strain step
             List<double> HighestStrains = new List<double>();
-            double IntervalEndTime = STRAIN_STEP;
+            double IntervalEndTime = ActualStrainStep;
             double MaximumStrain = 0; // We need to keep track of the maximum strain in the current interval
 
             TpHitObject PreviousHitObject = null;
@@ -182,7 +183,7 @@ namespace osutp.TomPoints
                     }
 
                     // Go to the next time interval
-                    IntervalEndTime += STRAIN_STEP;
+                    IntervalEndTime += ActualStrainStep;
                 }
 
                 // Obtain maximum strain
