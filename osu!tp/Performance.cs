@@ -107,7 +107,7 @@ namespace osutp.TomPoints
 
         public double ComputeSpeedValue()
         {
-            double speedValue = Math.Pow(5.0f * Math.Max(1.0f, Difficulty.SpeedStars / 0.036f) - 4.0f, 3.0f) / 100000.0f;
+            double speedValue = Math.Pow(5.0f * Math.Max(1.0f, Difficulty.SpeedStars / 0.0358f) - 4.0f, 3.0f) / 100000.0f;
 
             // Longer maps are worth more
             speedValue *= 1 + 0.1f * Math.Min(1.0f, Score.TotalHits() / 1500.0f);
