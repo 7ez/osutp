@@ -24,10 +24,6 @@ namespace osutp.TomPoints
 
         public TpDifficultyCalculation Process(BeatmapBase beatmap, List<HitObjectBase> hitObjects, Mods mods)
         {
-            // Fill our custom tpHitObject class, that carries additional information
-            List<TpHitObject> tpHitObjects = new List<TpHitObject>(hitObjects.Count);
-            float CircleRadius = (PLAYFIELD_WIDTH / 16.0f) * (1.0f - 0.7f * ((float)beatmap.DifficultyCircleSize - 5.0f) / 5.0f);
-
             // Adjust beatmap attributes, based on relevant mods
             if (mods.HasFlag(Mods.HardRock))
             {
@@ -57,6 +53,10 @@ namespace osutp.TomPoints
             {
                 StartTimeMultiplier = 1.25f;
             }
+            
+            // Fill our custom tpHitObject class, that carries additional information
+            List<TpHitObject> tpHitObjects = new List<TpHitObject>(hitObjects.Count);
+            float CircleRadius = (PLAYFIELD_WIDTH / 16.0f) * (1.0f - 0.7f * ((float)beatmap.DifficultyCircleSize - 5.0f) / 5.0f);
 
             foreach (HitObjectBase hitObject in hitObjects)
             {
