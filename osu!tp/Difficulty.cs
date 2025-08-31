@@ -22,15 +22,47 @@ namespace osutp.TomPoints
         private const double EXTREME_SCALING_FACTOR = 0.5;
         private const float PLAYFIELD_WIDTH = 512;
 
-        public TpDifficultyCalculation Process(BeatmapBase beatmap, List<HitObjectBase> hitObjects)
+        public TpDifficultyCalculation Process(BeatmapBase beatmap, List<HitObjectBase> hitObjects, Mods mods)
         {
             // Fill our custom tpHitObject class, that carries additional information
             List<TpHitObject> tpHitObjects = new List<TpHitObject>(hitObjects.Count);
             float CircleRadius = (PLAYFIELD_WIDTH / 16.0f) * (1.0f - 0.7f * ((float)beatmap.DifficultyCircleSize - 5.0f) / 5.0f);
 
+            // Adjust beatmap attributes, based on relevant mods
+            if (mods.HasFlag(Mods.HardRock))
+            {
+                beatmap.DifficultyCircleSize = Math.Min(beatmap.DifficultyCircleSize * 1.3f, 10);
+                beatmap.DifficultyHpDrainRate = Math.Min(beatmap.DifficultyHpDrainRate * 1.4f, 10);
+                beatmap.DifficultyApproachRate = Math.Min(beatmap.DifficultyApproachRate * 1.4f, 10);
+                beatmap.DifficultyOverall = Math.Min(beatmap.DifficultyOverall * 1.3f, 10);
+            }
+            if (mods.HasFlag(Mods.Easy))
+            {
+                beatmap.DifficultyCircleSize = Math.Max(beatmap.DifficultyCircleSize / 2, 0);
+                beatmap.DifficultyHpDrainRate = Math.Max(beatmap.DifficultyHpDrainRate / 2, 0);
+                beatmap.DifficultyApproachRate = Math.Max(beatmap.DifficultyApproachRate / 2, 0);
+                beatmap.DifficultyOverall = Math.Max(beatmap.DifficultyOverall / 2, 0);
+            }
+            
+            // Adjust the start-time multiplier for each hit object
+            // For DT/NC -> Speed * 150%
+            // For HT -> Speed * 75%
+            float StartTimeMultiplier = 1.0f;
+
+            if (mods.HasFlag(Mods.DoubleTime) || mods.HasFlag(Mods.Nightcore))
+            {
+                StartTimeMultiplier = 0.5f;
+            }
+            if (mods.HasFlag(Mods.HalfTime))
+            {
+                StartTimeMultiplier = 1.25f;
+            }
+
             foreach (HitObjectBase hitObject in hitObjects)
             {
-                tpHitObjects.Add(new TpHitObject(hitObject, CircleRadius));
+                var instance = new TpHitObject(hitObject, CircleRadius);
+                instance.ApplyStartTimeMultiplier(StartTimeMultiplier);
+                tpHitObjects.Add(instance);
             }
 
             // Sort tpHitObjects by StartTime of the HitObjects - just to make sure. Not using CompareTo, since it results in a crash (HitObjectBase inherits MarshalByRefObject)

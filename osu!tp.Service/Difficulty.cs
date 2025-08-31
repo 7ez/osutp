@@ -37,7 +37,7 @@ namespace osutp.Service
                 .DeserializeObject<DifficultyCalculationRequest>(json)
                 ?? throw new JsonSerializationException("Failed to deserialize DifficultyCalculationRequest.");
 
-            var calculator = () => new TpDifficulty().Process(request.Beatmap, request.HitObjects);
+            var calculator = () => new TpDifficulty().Process(request.Beatmap, request.HitObjects, request.Mods);
             var calculation = await Task.Run(calculator, context.RequestAborted).ConfigureAwait(false);
             if (calculation == null)
             {

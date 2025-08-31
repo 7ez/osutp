@@ -230,5 +230,11 @@ namespace osutp.TomPoints
             // Scale the distance by circle size.
             return (NormalizedStartPosition - other.NormalizedEndPosition).Length();
         }
+
+        public void ApplyStartTimeMultiplier(double multiplier)
+        {
+            // Apply a multiplier to the start time
+            BaseHitObject.StartTime = (int)(BaseHitObject.StartTime * multiplier);
+        }
     }
 }
