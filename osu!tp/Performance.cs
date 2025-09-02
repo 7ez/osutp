@@ -18,9 +18,10 @@ namespace osutp.TomPoints
             if (Score.IsRelaxing() || Score.IsAutoplay())
                 return new TpPerformanceResult();
             
-            // Custom multipliers for NoFail and SpunOut
+            // This is being adjusted to keep the final pp value scaled around what it used to be when changing things
             double multiplier = 1.1f;
 
+            // Custom multipliers for NoFail and SpunOut
             if (Score.Mods.HasFlag(Mods.NoFail))
                 multiplier *= 0.9f;
 
@@ -49,7 +50,7 @@ namespace osutp.TomPoints
         public double ComputeAimValue()
         {
             double aimValue = Math.Pow(5.0f * Math.Max(1.0f, Difficulty.AimStars / 0.036f) - 4.0f, 3.0f) / 100000.0f;
-
+            
             // Longer maps are worth more
             aimValue *= 1 + 0.1f * Math.Min(1.0f, Score.TotalHits() / 1500.0f);
 

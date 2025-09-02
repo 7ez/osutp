@@ -28,17 +28,17 @@ namespace osutp.TomPoints
             // Adjust beatmap attributes, based on relevant mods
             if (mods.HasFlag(Mods.HardRock))
             {
+                beatmap.DifficultyOverall = Math.Min(beatmap.DifficultyOverall * 1.4f, 10);
                 beatmap.DifficultyCircleSize = Math.Min(beatmap.DifficultyCircleSize * 1.3f, 10);
                 beatmap.DifficultyHpDrainRate = Math.Min(beatmap.DifficultyHpDrainRate * 1.4f, 10);
                 beatmap.DifficultyApproachRate = Math.Min(beatmap.DifficultyApproachRate * 1.4f, 10);
-                beatmap.DifficultyOverall = Math.Min(beatmap.DifficultyOverall * 1.3f, 10);
             }
             if (mods.HasFlag(Mods.Easy))
             {
+                beatmap.DifficultyOverall = Math.Max(beatmap.DifficultyOverall / 2, 0);
                 beatmap.DifficultyCircleSize = Math.Max(beatmap.DifficultyCircleSize / 2, 0);
                 beatmap.DifficultyHpDrainRate = Math.Max(beatmap.DifficultyHpDrainRate / 2, 0);
                 beatmap.DifficultyApproachRate = Math.Max(beatmap.DifficultyApproachRate / 2, 0);
-                beatmap.DifficultyOverall = Math.Max(beatmap.DifficultyOverall / 2, 0);
             }
             
             if (mods.HasFlag(Mods.DoubleTime) || mods.HasFlag(Mods.Nightcore))
