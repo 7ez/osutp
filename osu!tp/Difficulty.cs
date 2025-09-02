@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using osu.GameModes.Edit.AiMod;
 using osu.GameplayElements.Beatmaps;
 using osu.GameplayElements.HitObjects;
 
@@ -22,10 +23,18 @@ namespace osutp.TomPoints
         private const double EXTREME_SCALING_FACTOR = 0.5;
         private const float PLAYFIELD_WIDTH = 512;
         private float TimeRate = 1.0f;
-
-        public TpDifficultyCalculation Process(BeatmapBase beatmap, List<HitObjectBase> hitObjects, Mods mods)
+        
+        private static double MapDifficultyRange(double difficulty, double min, double mid, double max)
         {
-            // Adjust beatmap attributes, based on relevant mods
+            if (difficulty > 5)
+                return mid + (max - mid) * (difficulty - 5) / 5;
+            if (difficulty < 5)
+                return mid - (mid - min) * (5 - difficulty) / 5;
+            return mid;
+        }
+
+        private void AdjustDifficulty(BeatmapBase beatmap, Mods mods)
+        {
             if (mods.HasFlag(Mods.HardRock))
             {
                 beatmap.DifficultyOverall = Math.Min(beatmap.DifficultyOverall * 1.4f, 10);
@@ -43,20 +52,28 @@ namespace osutp.TomPoints
             
             if (mods.HasFlag(Mods.DoubleTime) || mods.HasFlag(Mods.Nightcore))
             {
-                beatmap.DifficultyApproachRate *= 1.186f;
-                beatmap.DifficultyOverall *= 1.125f;
                 TimeRate = 1.5f;
             }
             if (mods.HasFlag(Mods.HalfTime))
             {
-                beatmap.DifficultyApproachRate *= 0.814f;
-                beatmap.DifficultyOverall *= 0.875f;
                 TimeRate = 0.75f;
             }
             
+            var HitWindow300 = MapDifficultyRange(beatmap.DifficultyOverall, 80, 50, 20) / TimeRate;
+            var PreEmpt = MapDifficultyRange(beatmap.DifficultyApproachRate, 1800, 1200, 450) / TimeRate;
+            
+            beatmap.DifficultyOverall = (float)(-(HitWindow300 - 80.0) / 6.0);
+            beatmap.DifficultyApproachRate = (float)(PreEmpt > 1200.0 ? -(PreEmpt - 1800.0) / 120.0 : -(PreEmpt - 1200.0) / 150.0 + 5.0);
+        }
+
+        public TpDifficultyCalculation Process(BeatmapBase beatmap, List<HitObjectBase> hitObjects, Mods mods)
+        {
+            // Adjust beatmap attributes, based on relevant mods
+            AdjustDifficulty(beatmap, mods);
+            
             // Fill our custom tpHitObject class, that carries additional information
             List<TpHitObject> tpHitObjects = new List<TpHitObject>(hitObjects.Count);
-            float CircleRadius = (PLAYFIELD_WIDTH / 16.0f) * (1.0f - 0.7f * ((float)beatmap.DifficultyCircleSize - 5.0f) / 5.0f);
+            float CircleRadius = (PLAYFIELD_WIDTH / 16.0f) * (1.0f - 0.7f * (beatmap.DifficultyCircleSize - 5.0f) / 5.0f);
 
             foreach (HitObjectBase hitObject in hitObjects)
             {
