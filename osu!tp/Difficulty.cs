@@ -22,6 +22,8 @@ namespace osutp.TomPoints
         private const double STAR_SCALING_FACTOR = 0.045;
         private const double EXTREME_SCALING_FACTOR = 0.5;
         private const float PLAYFIELD_WIDTH = 512;
+        private const float SPEED_DELTA_OD = 0.125f;
+        private const float SPEED_DELTA_AR = 0.185f;
         private float TimeRate = 1.0f;
         
         private static double MapDifficultyRange(double difficulty, double min, double mid, double max)
@@ -53,17 +55,24 @@ namespace osutp.TomPoints
             if (mods.HasFlag(Mods.DoubleTime) || mods.HasFlag(Mods.Nightcore))
             {
                 TimeRate = 1.5f;
+                beatmap.DifficultyApproachRate *= 1 + SPEED_DELTA_AR;
+                beatmap.DifficultyOverall *= 1 + SPEED_DELTA_OD;
             }
             if (mods.HasFlag(Mods.HalfTime))
             {
                 TimeRate = 0.75f;
+                beatmap.DifficultyApproachRate *= 1 - SPEED_DELTA_AR;
+                beatmap.DifficultyOverall *= 1 - SPEED_DELTA_OD;
             }
             
-            var HitWindow300 = MapDifficultyRange(beatmap.DifficultyOverall, 80, 50, 20) / TimeRate;
-            var PreEmpt = MapDifficultyRange(beatmap.DifficultyApproachRate, 1800, 1200, 450) / TimeRate;
-            
+            // Method used to calculate AR / OD in osu!
+            // Not quite sure if it was used in original tp system, so for now i'll apply a static delta
+            /*
+            var HitWindow300 = (int)MapDifficultyRange(beatmap.DifficultyOverall, 80, 50, 20) / TimeRate;
+            var PreEmpt = (int)MapDifficultyRange(beatmap.DifficultyApproachRate, 1800, 1200, 450) / TimeRate;
             beatmap.DifficultyOverall = (float)(-(HitWindow300 - 80.0) / 6.0);
             beatmap.DifficultyApproachRate = (float)(PreEmpt > 1200.0 ? -(PreEmpt - 1800.0) / 120.0 : -(PreEmpt - 1200.0) / 150.0 + 5.0);
+            */
         }
 
         public TpDifficultyCalculation Process(BeatmapBase beatmap, List<HitObjectBase> hitObjects, Mods mods)
