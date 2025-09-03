@@ -49,7 +49,7 @@ namespace osutp.TomPoints
 
         public double ComputeAimValue()
         {
-            double aimValue = Math.Pow(5.0f * Math.Max(1.0f, Difficulty.AimStars / 0.036f) - 4.0f, 3.0f) / 100000.0f;
+            double aimValue = Math.Pow(5.0f * Math.Max(1.0f, Difficulty.AimStars / 0.0358f) - 4.0f, 3.0f) / 100000.0f;
             
             // Longer maps are worth more
             aimValue *= 1 + 0.1f * Math.Min(1.0f, Score.TotalHits() / 1500.0f);

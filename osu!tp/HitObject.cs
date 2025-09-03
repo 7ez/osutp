@@ -60,6 +60,7 @@ namespace osutp.TomPoints
                 }
 
                 LazySliderLengthFirst *= ScalingFactor;
+                
                 // If we have an odd amount of repetitions the current position will be the end of the slider. Note that this will -always- be triggered if
                 // BaseHitObject.SegmentCount <= 1, because BaseHitObject.SegmentCount can not be smaller than 1. Therefore NormalizedEndPosition will always be initialized
                 if (BaseHitObject.SegmentCount % 2 == 1)
