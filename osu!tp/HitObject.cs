@@ -133,7 +133,6 @@ namespace osutp.TomPoints
         // Caution: The subjective values are strong with this one
         private static double SpacingWeight(double distance, TpDifficulty.DifficultyType Type)
         {
-
             switch (Type)
             {
                 case TpDifficulty.DifficultyType.Speed:
