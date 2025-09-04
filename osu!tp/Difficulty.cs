@@ -65,7 +65,7 @@ namespace osutp.TomPoints
         private void RecalculateOdAndAr(BeatmapBase beatmap)
         {
             var PreEmpt = MapDifficultyRange(beatmap.DifficultyApproachRate, 1200, 800, 450) / TimeRate;
-            var HitWindow300 = MapDifficultyRange(beatmap.DifficultyOverall, 80, 50, 25) / TimeRate;
+            var HitWindow300 = MapDifficultyRange(beatmap.DifficultyOverall, 80, 50, 24) / TimeRate;
             beatmap.DifficultyOverall = (float)(-(HitWindow300 - 80.0) / 6.0);
             beatmap.DifficultyApproachRate = (float)(PreEmpt > 1200.0 ? -(PreEmpt - 1800.0) / 120.0 : -(PreEmpt - 1200.0) / 150.0 + 5.0);
         }
