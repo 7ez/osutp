@@ -68,7 +68,7 @@ namespace osutp.TomPoints
 
             if (Difficulty.ApproachRate > 10.0f)
             {
-                approachRateFactor += 0.145f * (Difficulty.ApproachRate - 10.0f);
+                approachRateFactor += 0.3f * (Difficulty.ApproachRate - 10.0f);
             }
             else if (Difficulty.ApproachRate < 8.0f)
             {
