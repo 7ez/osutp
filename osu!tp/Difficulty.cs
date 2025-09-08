@@ -53,19 +53,19 @@ namespace osutp.TomPoints
             if (mods.HasFlag(Mods.DoubleTime) || mods.HasFlag(Mods.Nightcore))
             {
                 TimeRate = 1.5f;
-                RecalculateOdAndAr(beatmap);
+                RecalculateBeatmapDifficulty(beatmap);
             }
             if (mods.HasFlag(Mods.HalfTime))
             {
                 TimeRate = 0.75f;
-                RecalculateOdAndAr(beatmap);
+                RecalculateBeatmapDifficulty(beatmap);
             }
         }
         
-        private void RecalculateOdAndAr(BeatmapBase beatmap)
+        private void RecalculateBeatmapDifficulty(BeatmapBase beatmap)
         {
             var PreEmpt = MapDifficultyRange(beatmap.DifficultyApproachRate, 1800, 1200, 450) / TimeRate;
-            var HitWindow300 = MapDifficultyRange(beatmap.DifficultyOverall, 80, 50, 24) / TimeRate;
+            var HitWindow300 = MapDifficultyRange(beatmap.DifficultyOverall, 80, 50, 20) / TimeRate;
             beatmap.DifficultyOverall = (float)(-(HitWindow300 - 80.0) / 6.0);
             beatmap.DifficultyApproachRate = (float)(PreEmpt > 1200 ? (1800 - PreEmpt) / 120 : (1200 - PreEmpt) / 150 + 5);
         }
