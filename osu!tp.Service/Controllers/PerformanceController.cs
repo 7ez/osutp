@@ -8,8 +8,8 @@ namespace osutp.Service.Controllers;
 public class PerformanceController : Controller
 {
     [HttpPost]
-    [Route("difficulty")]
-    public IActionResult CalculateDifficulty(
+    [Route("performance")]
+    public IActionResult CalculatePerformance(
         [FromBody] PerformanceCalculationRequest performanceCalculationRequest)
     {
         var performance = new TpPerformance(
