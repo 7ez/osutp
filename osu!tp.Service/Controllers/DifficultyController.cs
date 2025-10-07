@@ -4,7 +4,7 @@ using osutp.TomPoints;
 
 namespace osutp.Service.Controllers;
 
-[Route("[controller]")]
+[Route("")]
 public class DifficultyController : Controller
 {
     [HttpPost]
