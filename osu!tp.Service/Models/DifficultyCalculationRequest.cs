@@ -5,7 +5,7 @@ namespace osutp.Service.Models;
 
 public class DifficultyCalculationRequest
 {
-    public Mods Mods = Mods.None;
+    public Mods Mods { get; set; } = Mods.None;
     public BeatmapBase Beatmap { get; set; } = null!;
     public List<HitObjectBase> HitObjects { get; set; } = null!;
 }
