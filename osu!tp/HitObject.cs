@@ -2,233 +2,224 @@
 using System.Numerics;
 using osu.GameplayElements.HitObjects;
 
-namespace osutp.TomPoints
+namespace osutp.TomPoints;
+
+internal class TpHitObject
 {
-    class TpHitObject
+    // Almost the normed diameter of a circle (104 osu pixel). That is -after- position transforming.
+    private const double AlmostDiameter = 90; 
+
+    // Pseudo threshold values to distinguish between "singles" and "streams". Of course the border can not be defined clearly, therefore the algorithm
+    // has a smooth transition between those values. They also are based on tweaking and general feedback.
+    private const double StreamSpacingTreshold = 110;
+    private const double SingleSpacingTreshold = 125;
+
+    // In milliseconds. The smaller the value, the more accurate sliders are approximated. 0 leads to an infinite loop, so use something bigger.
+    private const int LazySliderStepLength = 1;
+
+    // Factor by how much speed / aim strain decays per second. Those values are results of tweaking a lot and taking into account general feedback.
+    // Opinionated observation: Speed is easier to maintain than accurate jumps.
+    public static readonly double[] DecayBase = { 0.3, 0.15 }; 
+
+    // Scaling values for weightings to keep aim and speed difficulty in balance. Found from testing a very large map pool (containing all ranked maps) and keeping the
+    // average values the same.
+    private static readonly double[] SpacingWeightScaling = { 1400, 26.25 };
+
+    public readonly HitObjectBase BaseHitObject;
+    public readonly int Combo;
+    private readonly float _lazySliderLengthFirst;
+    private readonly float _lazySliderLengthSubsequent;
+    private readonly Vector2 _normalizedEndPosition;
+
+    private readonly Vector2 _normalizedStartPosition;
+    public readonly double[] Strains = { 1, 1 };
+
+    public TpHitObject(HitObjectBase baseHitObject, float circleRadius)
     {
-        // Factor by how much speed / aim strain decays per second. Those values are results of tweaking a lot and taking into account general feedback.
-        public static readonly double[] DECAY_BASE = { 0.3, 0.15 }; // Opinionated observation: Speed is easier to maintain than accurate jumps.
+        BaseHitObject = baseHitObject;
 
-        private const double ALMOST_DIAMETER = 90; // Almost the normed diameter of a circle (104 osu pixel). That is -after- position transforming.
+        // We will scale everything by this factor, so we can assume a uniform CircleSize among beatmaps.
+        var scalingFactor = 52.0f / circleRadius;
+        _normalizedStartPosition = baseHitObject.Position * scalingFactor;
 
-        // Pseudo threshold values to distinguish between "singles" and "streams". Of course the border can not be defined clearly, therefore the algorithm
-        // has a smooth transition between those values. They also are based on tweaking and general feedback.
-        private const double STREAM_SPACING_TRESHOLD = 110;
-        private const double SINGLE_SPACING_TRESHOLD = 125;
-
-        // Scaling values for weightings to keep aim and speed difficulty in balance. Found from testing a very large map pool (containing all ranked maps) and keeping the
-        // average values the same.
-        private static readonly double[] SPACING_WEIGHT_SCALING = { 1400, 26.25 };
-
-        // In milliseconds. The smaller the value, the more accurate sliders are approximated. 0 leads to an infinite loop, so use something bigger.
-        private const int LAZY_SLIDER_STEP_LENGTH = 1;
-
-        public TpHitObject(HitObjectBase BaseHitObject, float CircleRadius)
+        // Calculate approximation of lazy movement on the slider
+        if ((baseHitObject.Type & HitObjectType.Slider) > 0)
         {
-            this.BaseHitObject = BaseHitObject;
+            var sliderFollowCircleRadius =
+                circleRadius *
+                3; // Not sure if this is correct, but here we do not need 100% exact values. This comes pretty darn close in my tests.
 
-            // We will scale everything by this factor, so we can assume a uniform CircleSize among beatmaps.
-            float ScalingFactor = (52.0f / CircleRadius);
-            NormalizedStartPosition = BaseHitObject.Position * ScalingFactor;
+            var segmentLength = baseHitObject.Length / baseHitObject.SegmentCount;
+            var segmentEndTime = baseHitObject.StartTime + segmentLength;
 
-            // Calculate approximation of lazy movement on the slider
-            if ((BaseHitObject.Type & HitObjectType.Slider) > 0)
+            // For simplifying this step we use actual osu! coordinates and simply scale the length, that we obtain by the ScalingFactor later
+            var cursorPos = baseHitObject.Position;
+
+            // Actual computation of the first lazy curve
+            for (var time = baseHitObject.StartTime + LazySliderStepLength;
+                 time < segmentEndTime;
+                 time += LazySliderStepLength)
             {
-                float SliderFollowCircleRadius = CircleRadius * 3; // Not sure if this is correct, but here we do not need 100% exact values. This comes pretty darn close in my tests.
+                var difference = baseHitObject.PositionAtTime(time) - cursorPos;
+                var distance = difference.Length();
 
-                int SegmentLength = BaseHitObject.Length / BaseHitObject.SegmentCount;
-                int SegmentEndTime = BaseHitObject.StartTime + SegmentLength;
-
-                // For simplifying this step we use actual osu! coordinates and simply scale the length, that we obtain by the ScalingFactor later
-                Vector2 CursorPos = BaseHitObject.Position;
-
-                // Actual computation of the first lazy curve
-                for (int Time = BaseHitObject.StartTime + LAZY_SLIDER_STEP_LENGTH; Time < SegmentEndTime; Time += LAZY_SLIDER_STEP_LENGTH)
+                // Did we move away too far?
+                if (distance > sliderFollowCircleRadius)
                 {
-                    Vector2 Difference = BaseHitObject.PositionAtTime(Time) - CursorPos;
-                    float Distance = Difference.Length();
+                    // Yep, we need to move the cursor
+                    difference =
+                        Vector2.Normalize(
+                            difference); // Obtain the direction of difference. We do no longer need the actual difference
+                    distance -= sliderFollowCircleRadius;
+                    cursorPos +=
+                        difference * distance; // We move the cursor just as far as needed to stay in the follow circle
+                    _lazySliderLengthFirst += distance;
+                }
+            }
+
+            _lazySliderLengthFirst *= scalingFactor;
+
+            // If we have an odd amount of repetitions the current position will be the end of the slider. Note that this will -always- be triggered if
+            // BaseHitObject.SegmentCount <= 1, because BaseHitObject.SegmentCount can not be smaller than 1. Therefore NormalizedEndPosition will always be initialized
+            if (baseHitObject.SegmentCount % 2 == 1) _normalizedEndPosition = cursorPos * scalingFactor;
+
+            // If we have more than one segment, then we also need to compute the length ob subsequent lazy curves. They are different from the first one, since the first
+            // one starts right at the beginning of the slider.
+            if (baseHitObject.SegmentCount > 1)
+            {
+                // Use the next segment
+                segmentEndTime += segmentLength;
+
+                for (var time = segmentEndTime - segmentLength + LazySliderStepLength;
+                     time < segmentEndTime;
+                     time += LazySliderStepLength)
+                {
+                    var difference = baseHitObject.PositionAtTime(time) - cursorPos;
+                    var distance = difference.Length();
 
                     // Did we move away too far?
-                    if (Distance > SliderFollowCircleRadius)
+                    if (distance > sliderFollowCircleRadius)
                     {
                         // Yep, we need to move the cursor
-                        Difference = Vector2.Normalize(Difference); // Obtain the direction of difference. We do no longer need the actual difference
-                        Distance -= SliderFollowCircleRadius;
-                        CursorPos += Difference * Distance; // We move the cursor just as far as needed to stay in the follow circle
-                        LazySliderLengthFirst += Distance;
+                        difference =
+                            Vector2.Normalize(
+                                difference); // Obtain the direction of difference. We do no longer need the actual difference
+                        distance -= sliderFollowCircleRadius;
+                        cursorPos +=
+                            difference *
+                            distance; // We move the cursor just as far as needed to stay in the follow circle
+                        _lazySliderLengthSubsequent += distance;
                     }
                 }
 
-                LazySliderLengthFirst *= ScalingFactor;
-                
-                // If we have an odd amount of repetitions the current position will be the end of the slider. Note that this will -always- be triggered if
-                // BaseHitObject.SegmentCount <= 1, because BaseHitObject.SegmentCount can not be smaller than 1. Therefore NormalizedEndPosition will always be initialized
-                if (BaseHitObject.SegmentCount % 2 == 1)
-                {
-                    NormalizedEndPosition = CursorPos * ScalingFactor;
-                }
-
-                // If we have more than one segment, then we also need to compute the length ob subsequent lazy curves. They are different from the first one, since the first
-                // one starts right at the beginning of the slider.
-                if (BaseHitObject.SegmentCount > 1)
-                {
-                    // Use the next segment
-                    SegmentEndTime += SegmentLength;
-
-                    for (int Time = SegmentEndTime - SegmentLength + LAZY_SLIDER_STEP_LENGTH; Time < SegmentEndTime; Time += LAZY_SLIDER_STEP_LENGTH)
-                    {
-                        Vector2 Difference = BaseHitObject.PositionAtTime(Time) - CursorPos;
-                        float Distance = Difference.Length();
-
-                        // Did we move away too far?
-                        if (Distance > SliderFollowCircleRadius)
-                        {
-                            // Yep, we need to move the cursor
-                            Difference = Vector2.Normalize(Difference); // Obtain the direction of difference. We do no longer need the actual difference
-                            Distance -= SliderFollowCircleRadius;
-                            CursorPos += Difference * Distance; // We move the cursor just as far as needed to stay in the follow circle
-                            LazySliderLengthSubsequent += Distance;
-                        }
-                    }
-
-                    LazySliderLengthSubsequent *= ScalingFactor;
-                    // If we have an even amount of repetitions the current position will be the end of the slider
-                    if (BaseHitObject.SegmentCount % 2 == 1)
-                    {
-                        NormalizedEndPosition = CursorPos * ScalingFactor;
-                    }
-                }
-
-                // TODO: Calculate the combo for this slider properly
-                //       This is just an approximation for now
-                double sliderTravel =
-                    LazySliderLengthFirst +
-                    LazySliderLengthSubsequent * (BaseHitObject.SegmentCount - 1);
-
-                Combo = (int)(sliderTravel / ALMOST_DIAMETER);
+                _lazySliderLengthSubsequent *= scalingFactor;
+                // If we have an even amount of repetitions the current position will be the end of the slider
+                if (baseHitObject.SegmentCount % 2 == 1) _normalizedEndPosition = cursorPos * scalingFactor;
             }
-            // We have a normal HitCircle or a spinner
-            else
-            {
-                NormalizedEndPosition = BaseHitObject.EndPosition * ScalingFactor;
-                Combo = 1;
-            }
+
+            // TODO: Calculate the combo for this slider properly
+            //       This is just an approximation for now
+            double sliderTravel =
+                _lazySliderLengthFirst +
+                _lazySliderLengthSubsequent * (baseHitObject.SegmentCount - 1);
+
+            Combo = (int)(sliderTravel / AlmostDiameter);
         }
-
-        public HitObjectBase BaseHitObject;
-        public double[] Strains = { 1, 1 };
-        public int Combo;
-
-        private Vector2 NormalizedStartPosition;
-        private Vector2 NormalizedEndPosition;
-        private float LazySliderLengthFirst = 0;
-        private float LazySliderLengthSubsequent = 0;
-
-        public void CalculateStrains(TpHitObject PreviousHitObject, double timeRate)
+        // We have a normal HitCircle or a spinner
+        else
         {
-            CalculateSpecificStrain(PreviousHitObject, TpDifficulty.DifficultyType.Speed, timeRate);
-            CalculateSpecificStrain(PreviousHitObject, TpDifficulty.DifficultyType.Aim, timeRate);
+            _normalizedEndPosition = baseHitObject.EndPosition * scalingFactor;
+            Combo = 1;
         }
+    }
 
-        // Caution: The subjective values are strong with this one
-        private static double SpacingWeight(double distance, TpDifficulty.DifficultyType Type)
+    public void CalculateStrains(TpHitObject previousHitObject, double timeRate)
+    {
+        CalculateSpecificStrain(previousHitObject, TpDifficulty.DifficultyType.Speed, timeRate);
+        CalculateSpecificStrain(previousHitObject, TpDifficulty.DifficultyType.Aim, timeRate);
+    }
+
+    // Caution: The subjective values are strong with this one
+    private static double SpacingWeight(double distance, TpDifficulty.DifficultyType type)
+    {
+        switch (type)
         {
-            switch (Type)
+            case TpDifficulty.DifficultyType.Speed:
             {
-                case TpDifficulty.DifficultyType.Speed:
-                    {
-                        double Weight;
+                var weight = 0d;
 
-                        if (distance > SINGLE_SPACING_TRESHOLD)
-                        {
-                            Weight = 2.5;
-                        }
-                        else if (distance > STREAM_SPACING_TRESHOLD)
-                        {
-                            Weight = 1.6 + 0.9 * (distance - STREAM_SPACING_TRESHOLD) / (SINGLE_SPACING_TRESHOLD - STREAM_SPACING_TRESHOLD);
-                        }
-                        else if (distance > ALMOST_DIAMETER)
-                        {
-                            Weight = 1.2 + 0.4 * (distance - ALMOST_DIAMETER) / (STREAM_SPACING_TRESHOLD - ALMOST_DIAMETER);
-                        }
-                        else if (distance > ALMOST_DIAMETER / 2)
-                        {
-                            Weight = 0.95 + 0.25 * (distance - (ALMOST_DIAMETER / 2)) / (ALMOST_DIAMETER / 2);
-                        }
-                        else
-                        {
-                            Weight = 0.95;
-                        }
+                if (distance > SingleSpacingTreshold)
+                    weight = 2.5;
+                else if (distance > StreamSpacingTreshold)
+                    weight = 1.6 + 0.9 * (distance - StreamSpacingTreshold) /
+                        (SingleSpacingTreshold - StreamSpacingTreshold);
+                else if (distance > AlmostDiameter)
+                    weight = 1.2 + 0.4 * (distance - AlmostDiameter) / (StreamSpacingTreshold - AlmostDiameter);
+                else if (distance > AlmostDiameter / 2)
+                    weight = 0.95 + 0.25 * (distance - AlmostDiameter / 2) / (AlmostDiameter / 2);
+                else
+                    weight = 0.95;
 
-                        return Weight;
-                    }
-                
-                case TpDifficulty.DifficultyType.Aim:
-                    return Math.Pow(distance, 0.99);
-                
-                default:
-                    // Should never happen. 
-                    return 0;
+                return weight;
             }
+
+            case TpDifficulty.DifficultyType.Aim:
+                return Math.Pow(distance, 0.99);
+
+            default:
+                // Should never happen. 
+                return 0;
         }
-        
-        private void CalculateSpecificStrain(TpHitObject PreviousHitObject, TpDifficulty.DifficultyType Type, double timeRate)
+    }
+
+    private void CalculateSpecificStrain(TpHitObject previousHitObject, TpDifficulty.DifficultyType type,
+        double timeRate)
+    {
+        var timeElapsed = (BaseHitObject.StartTime - previousHitObject.BaseHitObject.StartTime) / timeRate;
+        var decay = Math.Pow(DecayBase[(int)type], timeElapsed / 1000);
+        double addition = 1;
+
+        if ((BaseHitObject.Type & HitObjectType.Spinner) > 0)
         {
-            double TimeElapsed = (BaseHitObject.StartTime - PreviousHitObject.BaseHitObject.StartTime) / timeRate;
-            double Decay = Math.Pow(DECAY_BASE[(int)Type], TimeElapsed / 1000);
-            double Addition = 1;
-
-            if ((BaseHitObject.Type & HitObjectType.Spinner) > 0)
-            {
-                // Do nothing for spinners
-            }
-            else if ((BaseHitObject.Type & HitObjectType.Slider) > 0)
-            {
-                switch (Type)
-                {
-                    case TpDifficulty.DifficultyType.Speed:
-
-                        // For speed strain we treat the whole slider as a single spacing entity, since "Speed" is about how hard it is to click buttons fast.
-                        // The spacing weight exists to differentiate between being able to easily alternate or having to single.
-                        Addition =
-                            SpacingWeight(PreviousHitObject.LazySliderLengthFirst +
-                                          PreviousHitObject.LazySliderLengthSubsequent * (PreviousHitObject.BaseHitObject.SegmentCount - 1) +
-                                          DistanceTo(PreviousHitObject), Type) *
-                            SPACING_WEIGHT_SCALING[(int)Type];
-                        break;
-
-
-                    case TpDifficulty.DifficultyType.Aim:
-
-                        // For Aim strain we treat each slider segment and the jump after the end of the slider as separate jumps, since movement-wise there is no difference
-                        // to multiple jumps.
-                        Addition =
-                            (
-                                SpacingWeight(PreviousHitObject.LazySliderLengthFirst, Type) +
-                                SpacingWeight(PreviousHitObject.LazySliderLengthSubsequent, Type) * (PreviousHitObject.BaseHitObject.SegmentCount - 1) +
-                                SpacingWeight(DistanceTo(PreviousHitObject), Type)
-                            ) *
-                            SPACING_WEIGHT_SCALING[(int)Type];
-                        break;
-                }
-
-            }
-            else if ((BaseHitObject.Type & HitObjectType.Normal) > 0)
-            {
-                Addition = SpacingWeight(DistanceTo(PreviousHitObject), Type) * SPACING_WEIGHT_SCALING[(int)Type];
-            }
-
-            // Scale addition by the time, that elapsed. Filter out HitObjects that are too close to be played anyway to avoid crazy values by division through close to zero.
-            // You will never find maps that require this amongst ranked maps.
-            Addition /= Math.Max(TimeElapsed, 50);
-
-            Strains[(int)Type] = PreviousHitObject.Strains[(int)Type] * Decay + Addition;
+            // Do nothing for spinners
         }
-        
-        public double DistanceTo(TpHitObject other)
+        else if ((BaseHitObject.Type & HitObjectType.Slider) > 0)
         {
-            // Scale the distance by circle size.
-            return (NormalizedStartPosition - other.NormalizedEndPosition).Length();
+            addition = type switch
+            {
+                TpDifficulty.DifficultyType.Speed =>
+                    // For speed strain we treat the whole slider as a single spacing entity, since "Speed" is about how hard it is to click buttons fast.
+                    // The spacing weight exists to differentiate between being able to easily alternate or having to single.
+                    SpacingWeight(
+                        previousHitObject._lazySliderLengthFirst +
+                        previousHitObject._lazySliderLengthSubsequent *
+                        (previousHitObject.BaseHitObject.SegmentCount - 1) + DistanceTo(previousHitObject), type) *
+                    SpacingWeightScaling[(int)type],
+                TpDifficulty.DifficultyType.Aim =>
+                    // For Aim strain we treat each slider segment and the jump after the end of the slider as separate jumps, since movement-wise there is no difference
+                    // to multiple jumps.
+                    (SpacingWeight(previousHitObject._lazySliderLengthFirst, type) +
+                     SpacingWeight(previousHitObject._lazySliderLengthSubsequent, type) *
+                     (previousHitObject.BaseHitObject.SegmentCount - 1) +
+                     SpacingWeight(DistanceTo(previousHitObject), type)) * SpacingWeightScaling[(int)type],
+                _ => addition
+            };
         }
+        else if ((BaseHitObject.Type & HitObjectType.Normal) > 0)
+        {
+            addition = SpacingWeight(DistanceTo(previousHitObject), type) * SpacingWeightScaling[(int)type];
+        }
+
+        // Scale addition by the time, that elapsed. Filter out HitObjects that are too close to be played anyway to avoid crazy values by division through close to zero.
+        // You will never find maps that require this amongst ranked maps.
+        addition /= Math.Max(timeElapsed, 50);
+
+        Strains[(int)type] = previousHitObject.Strains[(int)type] * decay + addition;
+    }
+
+    private double DistanceTo(TpHitObject other)
+    {
+        // Scale the distance by circle size.
+        return (_normalizedStartPosition - other._normalizedEndPosition).Length();
     }
 }

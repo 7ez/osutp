@@ -1,26 +1,29 @@
 using System;
 
-namespace osu.GameplayElements.Beatmaps
+namespace osu.GameplayElements.Beatmaps;
+
+public class BeatmapBase : MarshalByRefObject
 {
-    public class BeatmapBase : MarshalByRefObject
-    {
-        #region Difficulty Settings
-        public float DifficultyApproachRate = 5;
-        public float DifficultyCircleSize = 5;
-        public float DifficultyHpDrainRate = 5;
-        public float DifficultyOverall = 5;
+    #region Difficulty Settings
 
-        public double DifficultySliderMultiplier = 1.4;
-        public double DifficultySliderTickRate = 1;
-        #endregion
+    public float DifficultyApproachRate = 5;
+    public float DifficultyCircleSize = 5;
+    public float DifficultyHpDrainRate = 5;
+    public float DifficultyOverall = 5;
 
-        #region Metadata
-        public string Artist = string.Empty;
-        public string ArtistUnicode;
+    public double DifficultySliderMultiplier = 1.4;
+    public double DifficultySliderTickRate = 1;
 
-        public string Tags = string.Empty;
-        public string Title = string.Empty;
-        public string TitleUnicode;
-        #endregion
-    }
+    #endregion
+
+    #region Metadata
+
+    public string Artist = string.Empty;
+    public string ArtistUnicode;
+
+    public string Tags = string.Empty;
+    public string Title = string.Empty;
+    public string TitleUnicode;
+
+    #endregion
 }

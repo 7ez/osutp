@@ -1,58 +1,54 @@
-using System.Collections.Generic;
-using osu.GameModes.Edit.AiMod.Reports;
-using osu.GameplayElements.HitObjects;
 using System;
+using System.Collections.Generic;
+using osu.GameplayElements.HitObjects;
 
-namespace osu.GameModes.Edit.AiMod
+namespace osu.GameModes.Edit.AiMod;
+
+public class AiReport : MarshalByRefObject
 {
-    public class AiReport : MarshalByRefObject
+    public readonly BeenCorrectedDelegate corrected;
+    public readonly string Information;
+    public readonly List<HitObjectBase> RelatedHitObjects = new();
+    public readonly Severity Severity;
+    public readonly string WebLink;
+    public int Time;
+
+    public AiReport(Severity severity, string information)
+        : this(-1, severity, information, 0, null)
     {
-        public readonly string Information;
-        public readonly Severity Severity;
-        public int Time;
-        public readonly string WebLink;
-        public readonly List<HitObjectBase> RelatedHitObjects = new List<HitObjectBase>();
-        public readonly BeenCorrectedDelegate corrected;
-
-        public AiReport(Severity severity, string information)
-            : this(-1, severity, information, 0, null)
-        {
-
-        }
-
-        public AiReport(int time, Severity severity, string information, int weblink, BeenCorrectedDelegate corrected)
-        {
-            Time = time;
-            Severity = severity;
-            Information = information;
-            WebLink = "http://osu.ppy.sh/web/osu-gethelp.php?p=" + weblink;
-            this.corrected = corrected;
-        }
-
-        /// <summary>
-        /// Draws this instance.
-        /// </summary>
-        public virtual void Draw()
-        {
-
-        }
-
-        public bool Check()
-        {
-            if (corrected == null) return false;
-            return corrected();
-        }
     }
 
-    public enum Severity
+    public AiReport(int time, Severity severity, string information, int weblink, BeenCorrectedDelegate corrected)
     {
-        Info,
-        Warning,
-        Error
+        Time = time;
+        Severity = severity;
+        Information = information;
+        WebLink = "http://osu.ppy.sh/web/osu-gethelp.php?p=" + weblink;
+        this.corrected = corrected;
     }
 
     /// <summary>
-    /// Delegate method should return true when the issue related to the report has been corrected.
+    ///     Draws this instance.
     /// </summary>
-    public delegate bool BeenCorrectedDelegate();
+    public virtual void Draw()
+    {
+    }
+
+    public bool Check()
+    {
+        if (corrected == null) return false;
+        return corrected();
+    }
 }
+
+public enum Severity
+{
+    Info,
+    Warning,
+    Error
+}
+
+/// <summary>
+///     Delegate method should return true when the issue related to the report has been corrected.
+/// </summary>
+public delegate bool BeenCorrectedDelegate();

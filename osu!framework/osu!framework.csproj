@@ -1,14 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <OutputType>Library</OutputType>
-    <RootNamespace>osu</RootNamespace>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <AssemblyTitle>osu!framework</AssemblyTitle>
-    <Description>Open source components of osu! to allow for extensibility</Description>
-    <Product>osu!framework</Product>
-    <Copyright>Copyright © Dean Herbert 2012</Copyright>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <FileVersion>1.0.0.0</FileVersion>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <OutputType>Library</OutputType>
+        <RootNamespace>osu</RootNamespace>
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+        <AssemblyTitle>osu!framework</AssemblyTitle>
+        <Description>Open source components of osu! to allow for extensibility</Description>
+        <Product>osu!framework</Product>
+        <Copyright>Copyright © Dean Herbert 2012</Copyright>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+        <FileVersion>1.0.0.0</FileVersion>
+        <LangVersion>default</LangVersion>
+    </PropertyGroup>
 </Project>
